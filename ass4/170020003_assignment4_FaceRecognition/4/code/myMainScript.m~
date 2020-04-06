@@ -1,0 +1,50 @@
+%% MyMainScript
+clc; clear;
+A = randn(5,5);
+[u,s,v] = MySVD(A);
+[U,S,V] = svd(A);
+
+if sum(sum(abs(u*s*v'-U*S*V'))) < 0.0005
+    display('matched');
+end
+tic;
+%% Your code here
+function [U,S,V] = MySVD(A)
+    if size(A,1) > size(A,2)
+        [U,~] = eig(A*A');
+        [V,D] = eig(A'*A);
+    else 
+        [U,D] = eig(A*A');
+        [V,~] = eig(A'*A);
+    end
+    V = flip(V,2);
+    U = flip(U,2);
+    D = fliplr(fliplr(D)');
+    s = D.^0.5;
+    S = zeros(size(A));
+    S(1:size(s,1),1:size(s,1)) = s;
+    U = U - 2*U.*(checkEqual(A*V,U*S));
+end
+
+% function [ U, V, S ] = MySVD( A )
+% [U, S2] = eig(A*A');
+% [V, S3] = eig(A'*A);
+% 
+% U = fliplr(U);
+% V = fliplr(V);
+% S2 = fliplr(fliplr(S2)');
+% 
+% S = S2.^(0.5);
+% V = V - 2*V.*checkEqual(A*V,-U*S);
+% S=diag(S);
+% end
+
+function check = checkEqual( a,b )
+% Compare elements of a and b, with relative error of 0.05
+% tf = (abs((a-b)./b));
+% tf(~isfinite(tf)) = 0;
+% tf = tf(:,:)<0.05;
+check = zeros(size(a,1),size(a,1));
+c = abs(a-b)>0.005;
+check(1:min(size(c,1),size(check,1)),1:min(size(c,2),size(check,2))) = c(1:min(size(c,1),size(check,1)),1:min(size(c,2),size(check,2)));
+end
